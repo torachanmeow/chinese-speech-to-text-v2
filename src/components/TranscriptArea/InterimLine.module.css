@@ -1,0 +1,124 @@
+.interim {
+  display: flex;
+  align-items: stretch;
+  min-height: 60px;
+  background: rgba(107, 143, 158, 0.03);
+}
+
+.interimEmpty {
+  min-height: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.leftColumn {
+  flex: 1;
+  padding: 16px 24px 16px 32px;
+  border-right: 1px solid var(--border);
+  min-width: 0;
+}
+
+.rightColumn {
+  flex: 1;
+  padding: 16px 32px 16px 24px;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 38px;
+}
+
+.flushTranslateButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-family: var(--font-ui);
+  letter-spacing: 0.04em;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.flushTranslateButton:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.translation {
+  font-family: var(--font-japanese);
+  font-size: 18px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  letter-spacing: 0.03em;
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 1s step-end infinite;
+}
+
+.retranslateButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  padding: 4px 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  vertical-align: middle;
+  font-family: var(--font-ui);
+}
+
+.retranslateButton:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-wash);
+  animation: breathe 1.4s ease-in-out infinite;
+}
+
+.label {
+  font-family: var(--font-pinyin);
+  font-size: 10px;
+  font-weight: 300;
+  color: var(--ink-wash);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.text {
+  font-family: var(--font-chinese);
+  font-size: 21px;
+  line-height: 1.9;
+  color: var(--text-secondary);
+  word-break: break-all;
+}

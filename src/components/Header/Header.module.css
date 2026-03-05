@@ -1,0 +1,188 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  height: 56px;
+  background: var(--bg-ink);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+/* ── Brand ── */
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.brandKanji {
+  font-family: var(--font-chinese);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.08em;
+}
+
+.brandSub {
+  font-family: var(--font-pinyin);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+}
+
+/* ── Controls ── */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.separator {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 6px;
+}
+
+/* ── Mic Button — shaped like a seal (印鑑) ── */
+.micButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px 6px 8px;
+  border-radius: 24px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-stone);
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.micButton:hover {
+  background: var(--bg-paper);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.micIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-paper);
+  transition: all 0.3s ease;
+}
+
+.micLabel {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+/* Active state — vermillion seal glow */
+.micButton.active {
+  border-color: var(--accent);
+  background: rgba(196, 69, 58, 0.06);
+  color: var(--accent-bright);
+}
+
+.micButton.active .micIcon {
+  background: var(--accent);
+  color: white;
+  animation: sealPulse 2.5s ease-in-out infinite;
+}
+
+/* Error state */
+.micButton.error {
+  border-color: rgba(255, 100, 80, 0.3);
+  color: #e07060;
+}
+
+.micButton.error .micIcon {
+  background: rgba(255, 100, 80, 0.15);
+}
+
+.errorText {
+  font-size: 13px;
+  color: #c06050;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: var(--font-pinyin);
+}
+
+/* ── Toggle Switch ── */
+.toggleInput {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggleTrack {
+  width: 34px;
+  height: 18px;
+  border-radius: 9px;
+  background: var(--bg-stone);
+  border: 1px solid var(--border-strong);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.toggleThumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: all 0.3s ease;
+}
+
+.toggleOn {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.toggleOn .toggleThumb {
+  background: var(--accent);
+  left: 18px;
+}
+
+.toggleLabel {
+  font-size: 14px;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+}
+
+/* ── Tool Buttons ── */
+.toolButton {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.toolButton:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}

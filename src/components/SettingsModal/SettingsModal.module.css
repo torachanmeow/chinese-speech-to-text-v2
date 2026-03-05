@@ -1,0 +1,177 @@
+.dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--bg-stone);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  width: 420px;
+  max-width: 90vw;
+  margin: auto;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  font-family: var(--font-chinese);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.1em;
+}
+
+.closeButton {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.closeButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+/* ── Body ── */
+.body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--font-pinyin);
+}
+
+.input {
+  width: 100%;
+}
+
+.inputSmall {
+  width: 100px;
+}
+
+.select {
+  width: 100%;
+  cursor: pointer;
+}
+
+.select option {
+  background: var(--bg-stone);
+  color: var(--text-primary);
+}
+
+.passwordField {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.passwordField .input {
+  flex: 1;
+}
+
+.eyeButton {
+  padding: 10px 14px;
+  font-size: 11px;
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-paper);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+  transition: all 0.2s;
+}
+
+.eyeButton:hover {
+  color: var(--text-secondary);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-family: var(--font-pinyin);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* ── Footer ── */
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.cancelButton {
+  padding: 9px 18px;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  transition: all 0.2s;
+  letter-spacing: 0.04em;
+}
+
+.cancelButton:hover {
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+}
+
+.saveButton {
+  padding: 9px 24px;
+  font-size: 13px;
+  color: white;
+  background: var(--accent);
+  border-radius: var(--radius);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  transition: all 0.2s;
+}
+
+.saveButton:hover {
+  background: var(--accent-bright);
+}
