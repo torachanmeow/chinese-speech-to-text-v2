@@ -69,6 +69,36 @@
   letter-spacing: 0.03em;
 }
 
+.streamingWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: -22px; /* align label with timestamp row */
+}
+
+.translatingIndicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.translatingDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-wash);
+  animation: breathe 1.4s ease-in-out infinite;
+}
+
+.translatingLabel {
+  font-family: var(--font-pinyin);
+  font-size: 10px;
+  font-weight: 300;
+  color: var(--ink-wash);
+  letter-spacing: 0.15em;
+}
+
 /* Streaming cursor — thin vermillion line */
 .cursor {
   display: inline-block;

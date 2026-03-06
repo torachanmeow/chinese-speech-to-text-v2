@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { TranscriptLine } from '../../types';
+import { MODEL_OPTIONS } from '../../constants';
 import { usePinyin } from '../../hooks/usePinyin';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useSettingsStore } from '../../stores/useSettingsStore';
@@ -11,8 +12,10 @@ interface Props {
 
 export function TranscriptRow({ line }: Props) {
   const autoTranslate = useSettingsStore((s) => s.autoTranslate);
+  const model = useSettingsStore((s) => s.model);
   const { translate } = useTranslation();
   const hasTriggeredTranslation = useRef(false);
+  const modelLabel = MODEL_OPTIONS.find((m) => m.id === model)?.label ?? model;
 
   usePinyin(line.id, line.text);
 
@@ -80,9 +83,15 @@ export function TranscriptRow({ line }: Props) {
           </button>
         )}
         {line.translationStatus === 'streaming' && (
-          <div className={styles.translation}>
-            {line.translation}
-            <span className={styles.cursor} />
+          <div className={styles.streamingWrapper}>
+            <div className={styles.translatingIndicator}>
+              <span className={styles.translatingDot} />
+              <span className={styles.translatingLabel}>翻訳中 {modelLabel.replace(/（.*）/, '')}</span>
+            </div>
+            <div className={styles.translation}>
+              {line.translation}
+              <span className={styles.cursor} />
+            </div>
           </div>
         )}
         {line.translationStatus === 'done' && (
@@ -127,10 +136,16 @@ export function TranscriptRow({ line }: Props) {
           </div>
         )}
         {line.translationStatus === 'pending' && (
-          <div className={styles.translationLoading}>
-            <span className={styles.loadingDot} />
-            <span className={styles.loadingDot} />
-            <span className={styles.loadingDot} />
+          <div className={styles.streamingWrapper}>
+            <div className={styles.translatingIndicator}>
+              <span className={styles.translatingDot} />
+              <span className={styles.translatingLabel}>翻訳中 {modelLabel.replace(/（.*）/, '')}</span>
+            </div>
+            <div className={styles.translationLoading}>
+              <span className={styles.loadingDot} />
+              <span className={styles.loadingDot} />
+              <span className={styles.loadingDot} />
+            </div>
           </div>
         )}
       </div>

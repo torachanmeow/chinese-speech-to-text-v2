@@ -7,13 +7,14 @@ interface TranscriptState {
   interimText: string;
   interimTranslation: string;
   interimTranslationStatus: 'idle' | 'streaming' | 'done';
+  visibleCount: number;
   addLine: (line: TranscriptLine) => void;
   updateLine: (id: string, updates: Partial<TranscriptLine>) => void;
   setPendingText: (text: string) => void;
   setInterimText: (text: string) => void;
   setInterimTranslation: (text: string, status: 'idle' | 'streaming' | 'done') => void;
+  showMore: (count: number) => void;
   clearAll: () => void;
-  trimToMaxLines: (max: number) => void;
 }
 
 export const useTranscriptStore = create<TranscriptState>()((set) => ({
@@ -22,6 +23,7 @@ export const useTranscriptStore = create<TranscriptState>()((set) => ({
   interimText: '',
   interimTranslation: '',
   interimTranslationStatus: 'idle' as const,
+  visibleCount: 0,
 
   addLine: (line) =>
     set((state) => ({
@@ -41,7 +43,6 @@ export const useTranscriptStore = create<TranscriptState>()((set) => ({
 
   setInterimText: (interimText) =>
     set((state) => {
-      // When new interim text appears after being empty, reset interim translation
       if (interimText && !state.interimText && state.interimTranslationStatus !== 'idle') {
         return { interimText, interimTranslation: '', interimTranslationStatus: 'idle' as const };
       }
@@ -51,11 +52,8 @@ export const useTranscriptStore = create<TranscriptState>()((set) => ({
   setInterimTranslation: (text, status) =>
     set({ interimTranslation: text, interimTranslationStatus: status }),
 
-  clearAll: () => set({ lines: [], pendingText: '', interimText: '', interimTranslation: '', interimTranslationStatus: 'idle' as const }),
+  showMore: (count) =>
+    set((state) => ({ visibleCount: state.visibleCount + count })),
 
-  trimToMaxLines: (max) =>
-    set((state) => {
-      if (max <= 0 || state.lines.length <= max) return state;
-      return { lines: state.lines.slice(-max) };
-    }),
+  clearAll: () => set({ lines: [], pendingText: '', interimText: '', interimTranslation: '', interimTranslationStatus: 'idle' as const, visibleCount: 0 }),
 }));

@@ -1,6 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
 import { useTranscriptStore } from '../stores/useTranscriptStore';
-import { useSettingsStore } from '../stores/useSettingsStore';
 import { SENTENCE_FLUSH_DELAY } from '../constants';
 
 function createRecognition(): SpeechRecognition | null {
@@ -26,7 +25,7 @@ export function useSpeechRecognition() {
   const addLine = useTranscriptStore((s) => s.addLine);
   const setInterimText = useTranscriptStore((s) => s.setInterimText);
   const setPendingText = useTranscriptStore((s) => s.setPendingText);
-  const trimToMaxLines = useTranscriptStore((s) => s.trimToMaxLines);
+  const setInterimTranslation = useTranscriptStore((s) => s.setInterimTranslation);
 
   const [isRecognizing, setIsRecognizing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,8 +50,6 @@ export function useSpeechRecognition() {
     const text = sentenceBufferRef.current.trim();
     if (!text) return;
 
-    const maxLines = useSettingsStore.getState().maxLines;
-
     addLine({
       id: crypto.randomUUID(),
       text,
@@ -62,14 +59,10 @@ export function useSpeechRecognition() {
       timestamp: Date.now(),
     });
 
-    if (maxLines > 0) {
-      trimToMaxLines(maxLines);
-    }
-
     sentenceBufferRef.current = '';
     lastFinalRef.current = '';
     setPendingText('');
-  }, [addLine, trimToMaxLines, clearFlushTimer, setPendingText]);
+  }, [addLine, clearFlushTimer, setPendingText]);
 
   const resetFlushTimer = useCallback(() => {
     clearFlushTimer();
@@ -208,6 +201,7 @@ export function useSpeechRecognition() {
     }
 
     setInterimText('');
+    setInterimTranslation('', 'idle');
     setIsRecognizing(false);
 
     if (recognitionRef.current) {
@@ -215,7 +209,7 @@ export function useSpeechRecognition() {
       detach(recognitionRef.current);
       recognitionRef.current = null;
     }
-  }, [clearFlushTimer, flushSentenceBuffer, setInterimText]);
+  }, [clearFlushTimer, flushSentenceBuffer, setInterimText, setInterimTranslation]);
 
   const toggle = useCallback(() => {
     if (isRecognizing) {

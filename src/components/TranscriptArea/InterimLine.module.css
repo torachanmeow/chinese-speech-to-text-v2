@@ -68,26 +68,64 @@
   animation: cursorBlink 1s step-end infinite;
 }
 
-.retranslateButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 8px;
-  padding: 4px 10px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  background: transparent;
-  border: 1px solid var(--border-strong);
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  vertical-align: middle;
-  font-family: var(--font-ui);
+.streamingWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: -22px;
 }
 
-.retranslateButton:hover {
+.translatingIndicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.translatingDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-wash);
+  animation: breathe 1.4s ease-in-out infinite;
+}
+
+.translatingLabel {
+  font-family: var(--font-pinyin);
+  font-size: 10px;
+  font-weight: 300;
+  color: var(--ink-wash);
+  letter-spacing: 0.15em;
+}
+
+.translationDone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.actionBar {
+  display: flex;
+  gap: 4px;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.actionButton:hover {
   color: var(--accent);
-  border-color: var(--accent);
   background: var(--accent-soft);
 }
 
