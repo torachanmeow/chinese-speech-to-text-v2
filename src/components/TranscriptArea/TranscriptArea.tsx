@@ -1,14 +1,29 @@
+import { useMemo } from 'react';
 import { useTranscriptStore } from '../../stores/useTranscriptStore';
+import { useSettingsStore } from '../../stores/useSettingsStore';
 import { useAutoScroll } from '../../hooks/useAutoScroll';
 import { TranscriptRow } from './TranscriptRow';
 import { InterimLine } from './InterimLine';
 import styles from './TranscriptArea.module.css';
 
+const LOAD_MORE_COUNT = 10;
+
 export function TranscriptArea() {
   const lines = useTranscriptStore((s) => s.lines);
   const pendingText = useTranscriptStore((s) => s.pendingText);
   const interimText = useTranscriptStore((s) => s.interimText);
+  const visibleCount = useTranscriptStore((s) => s.visibleCount);
+  const showMore = useTranscriptStore((s) => s.showMore);
+  const maxLines = useSettingsStore((s) => s.maxLines);
   const { containerRef, handleScroll } = useAutoScroll([lines.length, pendingText, interimText]);
+
+  const baseLimit = maxLines > 0 ? maxLines : Infinity;
+  const limit = baseLimit + visibleCount;
+  const visibleLines = useMemo(() => {
+    if (lines.length <= limit) return lines;
+    return lines.slice(-limit);
+  }, [lines, limit]);
+  const hasHidden = lines.length > visibleLines.length;
 
   return (
     <div className={styles.container}>
@@ -43,7 +58,16 @@ export function TranscriptArea() {
           </div>
         )}
 
-        {lines.map((line) => (
+        {hasHidden && (
+          <button
+            className={styles.loadMoreButton}
+            onClick={() => showMore(LOAD_MORE_COUNT)}
+          >
+            過去のデータを読み込む（残り {lines.length - visibleLines.length} 件）
+          </button>
+        )}
+
+        {visibleLines.map((line) => (
           <TranscriptRow key={line.id} line={line} />
         ))}
 
