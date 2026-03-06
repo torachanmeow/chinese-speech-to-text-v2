@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { TranscriptLine } from '../../types';
 import { usePinyin } from '../../hooks/usePinyin';
 import { useTranslation } from '../../hooks/useTranslation';
@@ -27,11 +27,20 @@ export function TranscriptRow({ line }: Props) {
     }
   }, [autoTranslate, line.id, line.text, line.translationStatus, translate]);
 
+  const [copied, setCopied] = useState(false);
+
   const handleManualTranslate = () => {
     if (line.translationStatus !== 'streaming') {
       hasTriggeredTranslation.current = false;
       translate(line.id, line.text);
     }
+  };
+
+  const handleCopy = async () => {
+    if (!line.translation) return;
+    await navigator.clipboard.writeText(line.translation);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
   };
 
   const timestamp = new Date(line.timestamp).toLocaleTimeString('ja-JP', {
@@ -77,14 +86,36 @@ export function TranscriptRow({ line }: Props) {
           </div>
         )}
         {line.translationStatus === 'done' && (
-          <div className={styles.translation}>
-            {line.translation}
-            <button
-              className={styles.retranslateButton}
-              onClick={handleManualTranslate}
-            >
-              ↻ 再翻訳
-            </button>
+          <div className={styles.translationDone}>
+            <div className={styles.translation}>{line.translation}</div>
+            <div className={styles.actionBar}>
+              <button
+                className={styles.actionButton}
+                onClick={handleCopy}
+                title="コピー"
+              >
+                {copied ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                )}
+              </button>
+              <button
+                className={styles.actionButton}
+                onClick={handleManualTranslate}
+                title="再翻訳"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="23 4 23 10 17 10"/>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                </svg>
+              </button>
+            </div>
           </div>
         )}
         {line.translationStatus === 'error' && (
