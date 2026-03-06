@@ -1,4 +1,4 @@
-import { GEMINI_BASE_URL, TRANSLATION_PROMPT_TEMPLATE, GENERATION_CONFIG } from '../constants';
+import { GEMINI_BASE_URL, TRANSLATION_SYSTEM_INSTRUCTION, GENERATION_CONFIG } from '../constants';
 
 export class GeminiApiError extends Error {
   constructor(public status: number, message: string) {
@@ -13,7 +13,15 @@ export async function* streamTranslation(
   model: string,
 ): AsyncGenerator<string, void, unknown> {
   const url = `${GEMINI_BASE_URL}${model}:streamGenerateContent?alt=sse`;
-  const prompt = TRANSLATION_PROMPT_TEMPLATE + text;
+
+  const body = {
+    contents: [{ parts: [{ text }] }],
+    systemInstruction: { parts: [{ text: TRANSLATION_SYSTEM_INSTRUCTION }] },
+    generationConfig: {
+      temperature: GENERATION_CONFIG.temperature,
+      maxOutputTokens: GENERATION_CONFIG.maxOutputTokens,
+    },
+  };
 
   const response = await fetch(url, {
     method: 'POST',
@@ -21,13 +29,7 @@ export async function* streamTranslation(
       'Content-Type': 'application/json',
       'x-goog-api-key': apiKey,
     },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: GENERATION_CONFIG.temperature,
-        maxOutputTokens: GENERATION_CONFIG.maxOutputTokens,
-      },
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
