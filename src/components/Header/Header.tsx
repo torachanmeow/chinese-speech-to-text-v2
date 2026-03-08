@@ -6,7 +6,7 @@ import { SettingsModal } from '../SettingsModal/SettingsModal';
 import styles from './Header.module.css';
 
 export function Header() {
-  const { isRecognizing, error, toggle } = useSpeechRecognition();
+  const { isRecognizing, isReconnecting, error, toggle } = useSpeechRecognition();
   const autoTranslate = useSettingsStore((s) => s.autoTranslate);
   const setAutoTranslate = useSettingsStore((s) => s.setAutoTranslate);
   const clearAll = useTranscriptStore((s) => s.clearAll);
@@ -21,7 +21,7 @@ export function Header() {
 
       <div className={styles.controls}>
         <button
-          className={`${styles.micButton} ${isRecognizing ? styles.active : ''} ${error ? styles.error : ''}`}
+          className={`${styles.micButton} ${isRecognizing ? styles.active : ''} ${isReconnecting ? styles.reconnecting : ''} ${error ? styles.error : ''}`}
           onClick={toggle}
           aria-label={isRecognizing ? '音声認識を停止' : '音声認識を開始'}
         >
@@ -32,7 +32,7 @@ export function Header() {
             </svg>
           </div>
           <span className={styles.micLabel}>
-            {isRecognizing ? '認識中' : '開始'}
+            {isReconnecting ? '再接続中' : isRecognizing ? (<>認識中<span className={styles.dots} /></>) : '開始'}
           </span>
         </button>
 
