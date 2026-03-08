@@ -79,9 +79,30 @@
 }
 
 .micLabel {
+  display: inline-block;
+  width: 6.5em;
+  text-align: center;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.04em;
+}
+
+.dots {
+  display: inline-block;
+  width: 1.5em;
+  text-align: left;
+}
+
+.dots::after {
+  content: '';
+  animation: dotCycle 4s steps(1) infinite;
+}
+
+@keyframes dotCycle {
+  0%      { content: ''; }
+  25%     { content: '.'; }
+  50%     { content: '..'; }
+  75%     { content: '...'; }
 }
 
 /* Active state — vermillion seal glow */
@@ -95,6 +116,24 @@
   background: var(--accent);
   color: white;
   animation: sealPulse 2.5s ease-in-out infinite;
+}
+
+/* Reconnecting state — amber warning */
+.micButton.reconnecting {
+  border-color: rgba(230, 180, 60, 0.5);
+  background: rgba(230, 180, 60, 0.06);
+  color: #e0b040;
+}
+
+.micButton.reconnecting .micIcon {
+  background: rgba(230, 180, 60, 0.25);
+  color: #e0b040;
+  animation: reconnectPulse 0.8s ease-in-out infinite;
+}
+
+@keyframes reconnectPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 /* Error state */

@@ -15,6 +15,9 @@ export const GENERATION_CONFIG = {
 
 export const SENTENCE_FLUSH_DELAY = 2000;
 
+/** If no onresult fires within this period (ms), force-restart SpeechRecognition */
+export const SR_WATCHDOG_TIMEOUT = 8000;
+
 export const STORAGE_KEY = 'chinese_stt_v2_settings';
 
 export const DEFAULT_SETTINGS = {

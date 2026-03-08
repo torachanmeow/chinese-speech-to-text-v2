@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { useTranscriptStore } from '../stores/useTranscriptStore';
-import { SENTENCE_FLUSH_DELAY } from '../constants';
+import { SENTENCE_FLUSH_DELAY, SR_WATCHDOG_TIMEOUT } from '../constants';
 
 function createRecognition(): SpeechRecognition | null {
   const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -28,6 +28,7 @@ export function useSpeechRecognition() {
   const setInterimTranslation = useTranscriptStore((s) => s.setInterimTranslation);
 
   const [isRecognizing, setIsRecognizing] = useState(false);
+  const [isReconnecting, setIsReconnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -37,11 +38,23 @@ export function useSpeechRecognition() {
   const lastFinalRef = useRef('');
   // Generation counter — incremented on every start/stop to invalidate stale callbacks
   const genRef = useRef(0);
+  const watchdogRef = useRef<number | null>(null);
+  const reconnectUntilRef = useRef(0);
+  const reconnectTimerRef = useRef<number | null>(null);
+  // Stable ref to wireRecognition so forceRestart can access it without circular deps
+  const wireRecognitionRef = useRef<(r: SpeechRecognition) => void>(() => {});
 
   const clearFlushTimer = useCallback(() => {
     if (flushTimerRef.current !== null) {
       clearTimeout(flushTimerRef.current);
       flushTimerRef.current = null;
+    }
+  }, []);
+
+  const clearWatchdog = useCallback(() => {
+    if (watchdogRef.current !== null) {
+      clearTimeout(watchdogRef.current);
+      watchdogRef.current = null;
     }
   }, []);
 
@@ -71,14 +84,87 @@ export function useSpeechRecognition() {
     }, SENTENCE_FLUSH_DELAY);
   }, [clearFlushTimer, flushSentenceBuffer]);
 
+  /** Force-restart: abort the current instance and create a fresh one */
+  const forceRestart = useCallback((gen: number) => {
+    if (isManualStopRef.current || genRef.current !== gen) return;
+
+    const old = recognitionRef.current;
+    if (old) {
+      try { old.abort(); } catch { /* already stopped */ }
+      detach(old);
+      recognitionRef.current = null;
+    }
+
+    // Rescue interim text into the buffer before flushing
+    const store = useTranscriptStore.getState();
+    if (store.interimText) {
+      sentenceBufferRef.current += store.interimText;
+    }
+    // Flush any accumulated text as a completed line before restarting
+    if (sentenceBufferRef.current.trim()) {
+      flushSentenceBuffer();
+    }
+    store.setInterimText('');
+    lastFinalRef.current = '';
+
+    const fresh = createRecognition();
+    if (!fresh) {
+      setIsRecognizing(false);
+      return;
+    }
+
+    wireRecognitionRef.current(fresh);
+    recognitionRef.current = fresh;
+
+    try {
+      fresh.start();
+    } catch {
+      setIsRecognizing(false);
+      setError('音声認識の再開に失敗しました。ボタンを押して再開してください。');
+    }
+  }, [flushSentenceBuffer]);
+
+  /** Reset the watchdog timer — called on every onresult and onstart */
+  const resetWatchdog = useCallback(() => {
+    clearWatchdog();
+    const gen = genRef.current;
+    watchdogRef.current = window.setTimeout(() => {
+      if (isManualStopRef.current || genRef.current !== gen) return;
+      console.warn('[SR] Watchdog: no result for', SR_WATCHDOG_TIMEOUT, 'ms — force-restarting');
+      setIsReconnecting(true);
+      reconnectUntilRef.current = Date.now() + 1500;
+      forceRestart(gen);
+    }, SR_WATCHDOG_TIMEOUT);
+  }, [clearWatchdog, forceRestart]);
+
+  const clearReconnecting = useCallback(() => {
+    if (reconnectTimerRef.current !== null) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
+    const remaining = reconnectUntilRef.current - Date.now();
+    if (remaining > 0) {
+      reconnectTimerRef.current = window.setTimeout(() => {
+        reconnectTimerRef.current = null;
+        setIsReconnecting(false);
+      }, remaining);
+    } else {
+      setIsReconnecting(false);
+    }
+  }, []);
+
   // Wire up a recognition instance with event handlers
   const wireRecognition = useCallback((recognition: SpeechRecognition) => {
     recognition.onstart = () => {
       setIsRecognizing(true);
+      clearReconnecting();
       setError(null);
+      resetWatchdog();
     };
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
+      clearReconnecting();
+      resetWatchdog();
       let interim = '';
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -106,6 +192,8 @@ export function useSpeechRecognition() {
     };
 
     recognition.onend = () => {
+      clearWatchdog();
+
       if (isManualStopRef.current) {
         setIsRecognizing(false);
         return;
@@ -124,7 +212,7 @@ export function useSpeechRecognition() {
         return;
       }
 
-      wireRecognition(fresh);
+      wireRecognitionRef.current(fresh);
       recognitionRef.current = fresh;
 
       // Minimal delay — just enough for Chrome to release the previous session
@@ -151,11 +239,15 @@ export function useSpeechRecognition() {
       if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
         setError('マイクのアクセスが拒否されました。ブラウザの設定を確認してください。');
         isManualStopRef.current = true;
+        clearWatchdog();
         setIsRecognizing(false);
       }
       // no-speech, network, aborted → onend will fire and auto-restart
     };
-  }, [flushSentenceBuffer, resetFlushTimer, setInterimText, setPendingText]);
+  }, [clearReconnecting, clearWatchdog, flushSentenceBuffer, resetFlushTimer, resetWatchdog, setInterimText, setPendingText]);
+
+  // Keep the ref in sync
+  wireRecognitionRef.current = wireRecognition;
 
   const start = useCallback(() => {
     // Clean up any lingering instance from a previous session
@@ -195,6 +287,12 @@ export function useSpeechRecognition() {
     // New generation — invalidates any pending auto-restart timeouts
     genRef.current += 1;
     clearFlushTimer();
+    clearWatchdog();
+    if (reconnectTimerRef.current !== null) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
+    setIsReconnecting(false);
 
     if (sentenceBufferRef.current.trim()) {
       flushSentenceBuffer();
@@ -209,7 +307,7 @@ export function useSpeechRecognition() {
       detach(recognitionRef.current);
       recognitionRef.current = null;
     }
-  }, [clearFlushTimer, flushSentenceBuffer, setInterimText, setInterimTranslation]);
+  }, [clearFlushTimer, clearWatchdog, flushSentenceBuffer, setInterimText, setInterimTranslation]);
 
   const toggle = useCallback(() => {
     if (isRecognizing) {
@@ -219,5 +317,5 @@ export function useSpeechRecognition() {
     }
   }, [isRecognizing, start, stop]);
 
-  return { isRecognizing, error, toggle, start, stop };
+  return { isRecognizing, isReconnecting, error, toggle, start, stop };
 }
